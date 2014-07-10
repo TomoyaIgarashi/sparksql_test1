@@ -7,9 +7,10 @@ object SimpleApp {
   // you can use custom classes that implement the Product interface.
   case class Person(name: String, age: Int)
 
-
   def main(args: Array[String]) {
-    val conf = new SparkConf().setAppName("Simple Application")
+    val conf = new SparkConf()
+      .setMaster("local")
+      .setAppName("Simple Application")
     val sc = new SparkContext(conf)
 
     val sqlContext = new SQLContext(sc)
@@ -20,7 +21,7 @@ object SimpleApp {
 
 
     // Create an RDD of Person objects and register it as a table.
-    val people = sc.textFile("YourSparkHomeDir/examples/src/main/resources/people.txt").map(_.split(",")).map(p => Person(p(0), p(1).trim.toInt))
+    val people = sc.textFile("./people.txt").map(_.split(",")).map(p => Person(p(0), p(1).trim.toInt))
     people.registerAsTable("people")
 
     // SQL statements can be run by using the sql methods provided by sqlContext.
@@ -29,6 +30,8 @@ object SimpleApp {
     // The results of SQL queries are SchemaRDDs and support all the normal RDD operations.
     // The columns of a row in the result can be accessed by ordinal.
     teenagers.map(t => "Name: " + t(0)).collect().foreach(println)
+
+    sc.stop()
   }
 }
 
